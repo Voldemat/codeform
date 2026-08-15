@@ -1,4 +1,3 @@
-pub mod dom;
-pub mod decider;
-pub mod shared;
+pub mod hir_to_lir;
+pub mod ir;
 pub mod printer;
