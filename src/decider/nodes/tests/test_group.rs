@@ -28,7 +28,7 @@ mod group {
                 id: None,
                 mode: Cell::new(GroupMode::Flat),
             },
-            [
+            &[
                 builders::tokens(&["extend", "type", "Query", "{"]).as_slice(),
                 &[builders::soft_line()],
                 &builders::tokens(&["field", ":", "Int", "!"]),
@@ -54,7 +54,7 @@ mod group {
                 id: None,
                 mode: Cell::new(GroupMode::Flat),
             },
-            [
+            &[
                 builders::tokens(&["extend", "type", "Query", "{"]).as_slice(),
                 &[builders::soft_line()],
                 &builders::tokens(&["fieldasbdasbdasjkdbajslbdajbdajbdjkasbdjkasbdjabdjkasasdsahdasdnasdsakldanklsd", ":", "Int", "!"]),

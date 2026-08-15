@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StartTagKind {
-    Indent(crate::shared::IndentLevel),
+    Indent,
     Group(super::shared::Group),
     ConditionalGroup(super::shared::ConditionalGroup),
 }

@@ -92,14 +92,14 @@ pub fn decide_start_tag_kind<'s: 'n, 'n>(
                 conditional_group,
             )
         }
-        StartTagKind::Indent(append_level) => {
+        StartTagKind::Indent => {
             state.states_stack.push(
                 state
                     .states_stack
                     .last()
                     .unwrap()
                     .clone()
-                    .with_indent(*append_level),
+                    .with_indent(1),
             );
         }
     }

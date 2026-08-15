@@ -7,26 +7,26 @@ pub enum TextWidth {
 }
 
 impl TextWidth {
-    pub fn from_text<C: Fn(u8) -> u32>(
+    pub fn from_text<C: Fn(char) -> usize>(
         text: &str,
         indent_width: crate::shared::IndentWidth,
-        compute_unicode_width: C,
+        compute_char_width: C,
     ) -> TextWidth {
-        text.bytes().fold(
+        text.chars().fold(
             TextWidth::Width(Width::new(0)),
-            |current_text_width, byte| {
+            |current_text_width, c| {
                 let TextWidth::Width(current_width) = current_text_width else {
                     return current_text_width;
                 };
-                if byte == b'\n' {
-                    return TextWidth::Multiline;
-                };
-                let byte_width = match byte {
-                    b'\t' => indent_width.value(),
-                    ascii_byte if matches!(ascii_byte, b' '..=b'~') => 1,
-                    unicode_byte => compute_unicode_width(unicode_byte),
-                };
-                TextWidth::Width(current_width + byte_width)
+                match c {
+                    '\n' => TextWidth::Multiline,
+                    '\t' => {
+                        TextWidth::Width(current_width + indent_width.value())
+                    }
+                    other_char => TextWidth::Width(
+                        current_width + compute_char_width(other_char) as u32,
+                    ),
+                }
             },
         )
     }

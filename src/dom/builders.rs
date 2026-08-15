@@ -1,10 +1,23 @@
+use crate::shared::{IndentWidth, TextWidth};
+
 use super::{
-    node::{DOMNode, LineMode},
+    node::{DOMNode, LineMode, Text},
     tag::{
         EndTagKind, StartTagKind, Tag,
         shared::{ConditionalGroup, Group},
     },
 };
+
+pub fn text<F: Fn(char) -> usize>(
+    text: &str,
+    indent_width: IndentWidth,
+    compute_char_width: F,
+) -> DOMNode<'_> {
+    DOMNode::Text(Text {
+        text,
+        width: TextWidth::from_text(text, indent_width, compute_char_width),
+    })
+}
 
 pub fn token(value: &str) -> DOMNode<'_> {
     DOMNode::Token(value)
@@ -36,10 +49,10 @@ pub fn end_group<'s>() -> DOMNode<'s> {
 
 pub fn wrap_in_group<'s>(
     group: Group,
-    nodes: Vec<DOMNode<'s>>,
+    nodes: &[DOMNode<'s>],
 ) -> Vec<DOMNode<'s>> {
     let mut new_nodes = vec![start_group(group)];
-    new_nodes.extend(nodes);
+    new_nodes.extend_from_slice(nodes);
     new_nodes.push(end_group());
     new_nodes
 }
