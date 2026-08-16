@@ -1,7 +1,10 @@
 [package]
 name = "codeform"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2024"
+license = "MIT"
+description = "Library for code formatting"
+repository = "https://github.com/Voldemat/codeform"
 
 [dependencies]
 
