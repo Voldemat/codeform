@@ -3,7 +3,7 @@ use crate::ir::shared::IndentWidth;
 use super::{
     node::{LineMode, Node},
     tag::{
-        EndTagKind, StartTagKind, Tag,
+        EndTagKind, IndentMode, StartTagKind, Tag,
         shared::{ConditionalGroup, Group},
     },
     text::Text,
@@ -21,7 +21,7 @@ pub fn unicode_text<F: Fn(char) -> usize>(
     })
 }
 
-pub fn ascii_text(value: &str) -> Node<'_> {
+pub fn ascii_oneline_text(value: &str) -> Node<'_> {
     Node::AsciiOnelineText(value)
 }
 
@@ -66,10 +66,32 @@ pub fn end_conditional_group<'s>() -> Node<'s> {
 
 pub fn wrap_in_conditional_group<'s>(
     conditional_group: ConditionalGroup,
-    nodes: Vec<Node<'s>>,
+    nodes: &[Node<'s>],
 ) -> Vec<Node<'s>> {
     let mut new_nodes = vec![start_conditional_group(conditional_group)];
-    new_nodes.extend(nodes);
+    new_nodes.extend_from_slice(nodes);
     new_nodes.push(end_conditional_group());
+    new_nodes
+}
+
+pub fn byte<'s>(b: u8) -> Node<'s> {
+    Node::Byte(b)
+}
+
+pub fn start_indent<'s>(indent_mode: IndentMode) -> Node<'s> {
+    Node::Tag(Tag::Start(StartTagKind::Indent(indent_mode)))
+}
+
+pub fn end_indent<'s>() -> Node<'s> {
+    Node::Tag(Tag::End(EndTagKind::Indent))
+}
+
+pub fn wrap_in_indent<'s>(
+    indent_mode: IndentMode,
+    nodes: &[Node<'s>],
+) -> Vec<Node<'s>> {
+    let mut new_nodes = vec![start_indent(indent_mode)];
+    new_nodes.extend_from_slice(nodes);
+    new_nodes.push(end_indent());
     new_nodes
 }

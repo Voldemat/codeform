@@ -99,14 +99,24 @@ pub fn lower_start_tag_kind<'s: 'n, 'n>(
             None
         }
         hir::tag::StartTagKind::Indent(indent_mode) => {
+            let mut new_state = 
+                    state
+                        .states_stack
+                        .last()
+                        .unwrap()
+                        .clone()
+                        .with_expected_end_tag_kind(Some(
+                            hir::tag::EndTagKind::Indent,
+                        ));
             if indent_mode == hir::tag::IndentMode::Hard
                 || state.active_mode() == shared::PrintMode::Expanded
             {
-                state.states_stack.push(
-                    state.states_stack.last().unwrap().clone().with_indent(1),
-                );
+                new_state.indent_level += 1;
+                state.states_stack.push(new_state);
                 Some(lir::tag::StartTagKind::Indent)
             } else {
+                new_state.enabled = false;
+                state.states_stack.push(new_state);
                 None
             }
         }

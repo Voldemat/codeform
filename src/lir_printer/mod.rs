@@ -81,6 +81,35 @@ pub fn process_tag(state: &mut State, tag: &lir::tag::Tag) {
     }
 }
 
+pub fn flush_indent_if_needed<'s, IOWriter: std::io::Write>(
+    io_writer: &mut IOWriter,
+    config: &Config,
+    state: &mut State,
+) -> std::io::Result<()> {
+    if state.is_indent_flushed {
+        Ok(())
+    } else {
+        state.is_indent_flushed = true;
+        io_writer.write_all(
+            " ".repeat(
+                state.indent_level as usize
+                    * config.indent_width.value() as usize,
+            )
+            .as_bytes(),
+        )
+    }
+}
+
+pub fn print_bytes<'s, IOWriter: std::io::Write>(
+    io_writer: &mut IOWriter,
+    config: &Config,
+    state: &mut State,
+    value: &[u8],
+) -> std::io::Result<()> {
+    flush_indent_if_needed(io_writer, config, state)
+        .and_then(|_| io_writer.write_all(value))
+}
+
 pub fn print_node<'s, IOWriter: std::io::Write>(
     io_writer: &mut IOWriter,
     config: &Config,
@@ -88,9 +117,9 @@ pub fn print_node<'s, IOWriter: std::io::Write>(
     node: &lir::node::Node<'s>,
 ) -> std::io::Result<()> {
     match node {
-        lir::node::Node::Byte(byte) => io_writer.write_all(&[*byte]),
+        lir::node::Node::Byte(byte) => print_bytes(io_writer, config, state, &[*byte]),
         lir::node::Node::Text(ascii_text) => {
-            io_writer.write_all(ascii_text.as_bytes())
+            print_bytes(io_writer, config, state, ascii_text.as_bytes())
         }
         lir::node::Node::Line(line_mode) => {
             print_line_mode(io_writer, config, state, *line_mode)
