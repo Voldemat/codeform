@@ -1,7 +1,8 @@
 mod end_tag_kind;
-pub mod shared;
+mod shared;
 mod start_tag_kind;
 pub use end_tag_kind::EndTagKind;
+pub use shared::{Condition, ConditionalGroup, Group, GroupId};
 pub use start_tag_kind::{IndentMode, StartTagKind};
 
 #[derive(Debug, Clone, PartialEq, Eq)]

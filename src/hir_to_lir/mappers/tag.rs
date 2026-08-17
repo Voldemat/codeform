@@ -7,7 +7,7 @@ pub fn process_group<'s: 'n, 'n>(
     config: &Config,
     state: &mut State,
     get_next_nodes: impl Fn() -> &'n [hir::node::Node<'s>],
-    group: hir::tag::shared::Group,
+    group: hir::tag::Group,
 ) {
     let print_mode = match group.default_print_mode {
         crate::ir::shared::PrintMode::Expanded => {
@@ -42,7 +42,7 @@ pub fn process_conditional_group<'s: 'n, 'n>(
     config: &Config,
     state: &mut State,
     get_next_nodes: impl Fn() -> &'n [hir::node::Node<'s>],
-    conditional_group: hir::tag::shared::ConditionalGroup,
+    conditional_group: hir::tag::ConditionalGroup,
 ) {
     // 1. Look up the mode of the target group in state
     let condition_met = state
@@ -99,18 +99,16 @@ pub fn lower_start_tag_kind<'s: 'n, 'n>(
             None
         }
         hir::tag::StartTagKind::Indent(indent_mode) => {
-            let mut new_state = 
-                    state
-                        .states_stack
-                        .last()
-                        .unwrap()
-                        .clone()
-                        .with_expected_end_tag_kind(Some(
-                            hir::tag::EndTagKind::Indent,
-                        ));
+            let mut new_state = state
+                .states_stack
+                .last()
+                .unwrap()
+                .clone()
+                .with_expected_end_tag_kind(Some(hir::tag::EndTagKind::Indent));
             if indent_mode == hir::tag::IndentMode::Hard
                 || state.active_mode() == shared::PrintMode::Expanded
             {
+                state.advance(config.indent_width.value());
                 new_state.indent_level += 1;
                 state.states_stack.push(new_state);
                 Some(lir::tag::StartTagKind::Indent)
@@ -124,6 +122,7 @@ pub fn lower_start_tag_kind<'s: 'n, 'n>(
 }
 
 pub fn lower_end_tag_kind(
+    config: &Config,
     state: &mut State,
     end_tag_kind: hir::tag::EndTagKind,
 ) -> Option<lir::tag::EndTagKind> {
@@ -134,6 +133,7 @@ pub fn lower_end_tag_kind(
         hir::tag::EndTagKind::Group => None,
         hir::tag::EndTagKind::Indent => {
             if last_state.enabled {
+                state.current_line_width -= config.indent_width.value();
                 Some(lir::tag::EndTagKind::Indent)
             } else {
                 None
@@ -157,9 +157,11 @@ pub fn lower<'s: 'n, 'n>(
                 })
         }
         hir::tag::Tag::End(end_tag_kind) => {
-            lower_end_tag_kind(state, end_tag_kind).map(|end_tag_kind| {
-                lir::node::Node::Tag(lir::tag::Tag::End(end_tag_kind))
-            })
+            lower_end_tag_kind(config, state, end_tag_kind).map(
+                |end_tag_kind| {
+                    lir::node::Node::Tag(lir::tag::Tag::End(end_tag_kind))
+                },
+            )
         }
     }
 }

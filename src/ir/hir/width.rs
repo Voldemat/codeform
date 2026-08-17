@@ -14,7 +14,6 @@ impl Width {
 impl std::ops::Add<u32> for Width {
     type Output = Self;
     fn add(self, rhs: u32) -> Self::Output {
-        let _ = self.0.saturating_add(rhs);
-        self
+        Self(self.0.saturating_add(rhs))
     }
 }

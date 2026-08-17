@@ -9,12 +9,6 @@ pub enum LineMode {
     Empty,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BestFittingMode {
-    FirstLine,
-    AllLines,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Node<'s> {
     Byte(u8),

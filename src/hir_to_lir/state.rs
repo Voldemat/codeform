@@ -49,7 +49,7 @@ pub struct State {
     pub current_line_width: crate::ir::shared::CurrentLineWidth,
     pub states_stack: Vec<CurrentState>,
     pub group_mode_map: std::collections::HashMap<
-        crate::ir::hir::tag::shared::GroupId,
+        crate::ir::hir::tag::GroupId,
         crate::ir::shared::PrintMode,
     >,
 }

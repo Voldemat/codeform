@@ -8,6 +8,7 @@ pub struct Config {
 pub struct State {
     pub indent_level: crate::ir::shared::IndentLevel,
     pub is_indent_flushed: bool,
+    pub is_empty_line_pending: bool,
 }
 
 impl State {
@@ -21,6 +22,7 @@ impl Default for State {
         Self {
             indent_level: 0,
             is_indent_flushed: false,
+            is_empty_line_pending: false,
         }
     }
 }
@@ -45,7 +47,7 @@ pub fn print_line_mode<IOWriter: std::io::Write>(
         lir::node::LineMode::Normal => print_new_line(io_writer, config, state),
         lir::node::LineMode::Empty => {
             print_new_line(io_writer, config, state)?;
-            print_new_line(io_writer, config, state)?;
+            state.is_empty_line_pending = true;
             Ok(())
         }
     }
@@ -100,13 +102,27 @@ pub fn flush_indent_if_needed<'s, IOWriter: std::io::Write>(
     }
 }
 
+pub fn flush_new_line_if_needed<'s, IOWriter: std::io::Write>(
+    io_writer: &mut IOWriter,
+    config: &Config,
+    state: &mut State,
+) -> std::io::Result<()> {
+    if !state.is_empty_line_pending {
+        Ok(())
+    } else {
+        state.is_empty_line_pending = false;
+        print_new_line(io_writer, config, state)
+    }
+}
+
 pub fn print_bytes<'s, IOWriter: std::io::Write>(
     io_writer: &mut IOWriter,
     config: &Config,
     state: &mut State,
     value: &[u8],
 ) -> std::io::Result<()> {
-    flush_indent_if_needed(io_writer, config, state)
+    flush_new_line_if_needed(io_writer, config, state)
+        .and_then(|_| flush_indent_if_needed(io_writer, config, state))
         .and_then(|_| io_writer.write_all(value))
 }
 
@@ -117,7 +133,9 @@ pub fn print_node<'s, IOWriter: std::io::Write>(
     node: &lir::node::Node<'s>,
 ) -> std::io::Result<()> {
     match node {
-        lir::node::Node::Byte(byte) => print_bytes(io_writer, config, state, &[*byte]),
+        lir::node::Node::Byte(byte) => {
+            print_bytes(io_writer, config, state, &[*byte])
+        }
         lir::node::Node::Text(ascii_text) => {
             print_bytes(io_writer, config, state, ascii_text.as_bytes())
         }

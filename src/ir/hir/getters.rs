@@ -1,6 +1,6 @@
 use super::{
     node::Node,
-    tag::shared::{ConditionalGroup, Group},
+    tag::{ConditionalGroup, Group},
 };
 
 pub fn node_as_group<'n>(node: &'n Node<'_>) -> &'n Group {
