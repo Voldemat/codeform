@@ -163,5 +163,6 @@ pub fn lower<'s: 'n, 'n>(
                 },
             )
         }
+        hir::tag::Tag::ExpandParent => None,
     }
 }

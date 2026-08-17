@@ -9,20 +9,21 @@ pub use start_tag_kind::{IndentMode, StartTagKind};
 pub enum Tag {
     Start(StartTagKind),
     End(EndTagKind),
+    ExpandParent,
 }
 
 impl Tag {
     pub fn as_start(self: &Self) -> Option<&StartTagKind> {
         match self {
             Self::Start(kind) => Some(kind),
-            Self::End(_) => None,
+            _ => None,
         }
     }
 
     pub fn as_end(self: &Self) -> Option<&EndTagKind> {
         match self {
-            Self::Start(_) => None,
             Self::End(kind) => Some(kind),
+            _ => None,
         }
     }
 }

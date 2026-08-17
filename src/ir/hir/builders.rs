@@ -247,3 +247,7 @@ impl<'s> AsRef<[Node<'s>]> for NodesVec<'s> {
         self.0.as_ref()
     }
 }
+
+pub fn expand_parent<'s>() -> Node<'s> {
+    Node::Tag(Tag::ExpandParent)
+}

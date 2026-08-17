@@ -46,5 +46,6 @@ pub fn process_tag(
         crate::ir::hir::tag::Tag::End(end_tag_kind) => {
             process_end_tag_kind(fit_state, end_tag_kind)
         }
+        crate::ir::hir::tag::Tag::ExpandParent => NodeFitState::DoesNotFit,
     }
 }
